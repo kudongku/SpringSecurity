@@ -10,9 +10,11 @@ import java.security.Key;
 import java.util.Base64;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
@@ -74,6 +76,19 @@ public class JwtUtil {
             .parseClaimsJws(token)
             .getBody()
             .get("username", String.class);
+    }
+
+    public List<SimpleGrantedAuthority> getAuthorities(String token) {
+        List<?> authorities = Jwts.parserBuilder()
+            .setSigningKey(key)
+            .build()
+            .parseClaimsJws(token)
+            .getBody()
+            .get("authorities", List.class);
+
+        return authorities.stream()
+            .map(authority -> new SimpleGrantedAuthority((String) authority))
+            .collect(Collectors.toList());
     }
 
 }

@@ -54,12 +54,13 @@ public class JwtFilter extends OncePerRequestFilter {
 
         // username token 에서 꺼내기
         String username = jwtUtil.getUsernameFromToken(token);
+        List<SimpleGrantedAuthority> authorities = jwtUtil.getAuthorities(token);
 
         // 권한 부여
         UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
             username,
             null,
-            List.of(new SimpleGrantedAuthority("USER"))
+            authorities
         );
 
         // Detail을 넣는 단계
