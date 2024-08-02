@@ -43,4 +43,8 @@ public class User {
         this.authorities = new ArrayList<>();
         authorities.add(AuthorityEnum.USER.getAuthorityName());
     }
+
+    public void updateAuthority() {
+        authorities.add(AuthorityEnum.ADMIN.getAuthorityName());
+    }
 }

@@ -1,11 +1,15 @@
 package com.example.springsecurity.domain.user.controller;
 
+import com.example.springsecurity.domain.user.dto.UserGiveAuthorityRequestDto;
 import com.example.springsecurity.domain.user.dto.UserLoginRequestDto;
 import com.example.springsecurity.domain.user.dto.UserSignupRequestDto;
+import com.example.springsecurity.domain.user.entity.AuthorityEnum;
 import com.example.springsecurity.domain.user.service.UserService;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -43,6 +47,29 @@ public class UserController {
         );
 
         return ResponseEntity.ok(bearerToken);
+    }
+
+    @PostMapping
+    public ResponseEntity<String> giveAuthority(
+        @RequestBody UserGiveAuthorityRequestDto userGiveAuthorityRequestDto,
+        Authentication authentication
+    ) {
+        SimpleGrantedAuthority adminAuthority = new SimpleGrantedAuthority(
+            AuthorityEnum.ADMIN.getAuthorityName()
+        );
+
+        if (!authentication.getAuthorities().contains(adminAuthority)) {
+            return ResponseEntity.status(403).body("권한이 없습니다.");
+        }
+
+        userService.giveAuthority(
+            userGiveAuthorityRequestDto.getUserId(),
+            userGiveAuthorityRequestDto.getUsername()
+        );
+
+        return ResponseEntity.ok(
+            userGiveAuthorityRequestDto.getUsername() + "님에게 관리자 권한을 업데이트 했습니다."
+        );
     }
 
 }

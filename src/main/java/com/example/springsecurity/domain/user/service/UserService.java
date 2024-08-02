@@ -4,10 +4,12 @@ import com.example.springsecurity.domain.user.entity.User;
 import com.example.springsecurity.domain.user.repository.UserRepository;
 import com.example.springsecurity.global.util.JwtUtil;
 import jakarta.servlet.http.HttpServletResponse;
+import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @RequiredArgsConstructor
 @Service
@@ -17,6 +19,7 @@ public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
+    @Transactional
     public void signup(
         String username,
         String password,
@@ -30,6 +33,7 @@ public class UserService {
         userRepository.save(user);
     }
 
+    @Transactional
     public String login(
         String username,
         String password,
@@ -48,6 +52,19 @@ public class UserService {
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
         return bearerToken;
+    }
+
+    @Transactional
+    public void giveAuthority(Long userId, String username) {
+        User user = userRepository.findByUsername(username).orElseThrow(
+            () -> new RuntimeException("잘못된 아이디를 입력했습니다.")
+        );
+
+        if(!Objects.equals(user.getId(), userId)) {
+            throw new RuntimeException("userId가 일치하지 않습니다.");
+        }
+
+        user.updateAuthority();
     }
 
     private void validateNickname(String nickname) {
