@@ -29,6 +29,14 @@ public class JwtFilter extends OncePerRequestFilter {
         @NonNull FilterChain filterChain
     ) throws ServletException, IOException {
 
+        String path = request.getRequestURI();
+
+        // 로그인 및 회원가입 경로에서는 필터를 건너뛰기
+        if (path.equals("/api/v1/users/signup") || path.equals("/api/v1/users/login")) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
         String token = jwtUtil.getJwtFromHeader(request);
 
         if (token == null) {
