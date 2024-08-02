@@ -22,7 +22,7 @@ public class JwtUtil {
     @Value("${jwt.secret.key}")
     private String secretKey;
     private final Long expiredMs = 1000 * 60 * 60 * 24L; // 1 day
-    private static final String BEARER_PREFIX = "Bearer ";
+    private final String BEARER_PREFIX = "Bearer ";
     private Key key;
 
     @PostConstruct

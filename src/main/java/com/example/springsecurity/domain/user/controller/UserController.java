@@ -2,6 +2,7 @@ package com.example.springsecurity.domain.user.controller;
 
 import com.example.springsecurity.domain.user.dto.UserLoginRequestDto;
 import com.example.springsecurity.domain.user.service.UserService;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -17,10 +18,14 @@ public class UserController {
     private final UserService userService;
 
     @PostMapping("/login")
-    public ResponseEntity<String> login(@RequestBody UserLoginRequestDto userLoginRequestDto) {
+    public ResponseEntity<String> login(
+        @RequestBody UserLoginRequestDto userLoginRequestDto,
+        HttpServletResponse response
+    ) {
         String bearerToken = userService.login(
             userLoginRequestDto.getUsername(),
-            userLoginRequestDto.getPassword()
+            userLoginRequestDto.getPassword(),
+            response
         );
 
         return ResponseEntity.ok(bearerToken);
