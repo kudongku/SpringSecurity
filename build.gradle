@@ -32,9 +32,11 @@ dependencies {
     annotationProcessor 'org.projectlombok:lombok'
 
 //    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-//    implementation 'org.springframework.boot:spring-boot-starter-security'
 //    runtimeOnly 'com.mysql:mysql-connector-j'
-//    testImplementation 'org.springframework.security:spring-security-test'
+
+    // spring security
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+    testImplementation 'org.springframework.security:spring-security-test'
 
     // test
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
