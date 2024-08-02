@@ -1,9 +1,8 @@
 package com.example.springsecurity.global.config;
 
-import com.example.springsecurity.domain.user.service.UserService;
 import com.example.springsecurity.global.filter.JwtFilter;
+import com.example.springsecurity.global.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -17,10 +16,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @Configuration
 public class AuthenticationConfig {
 
-    private final UserService userService;
-
-    @Value("${jwt.secret.key}")
-    private String secretKey;
+    private final JwtUtil jwtUtil;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -32,7 +28,7 @@ public class AuthenticationConfig {
                 .requestMatchers("/api/v1/users/signup", "/api/v1/users/login").permitAll()
                 .anyRequest().authenticated()
             )
-            .addFilterBefore(new JwtFilter(userService, secretKey), UsernamePasswordAuthenticationFilter.class);
+            .addFilterBefore(new JwtFilter(jwtUtil), UsernamePasswordAuthenticationFilter.class);
         // @formatter:on
         return http.build();
     }
