@@ -9,6 +9,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import java.security.Key;
 import java.util.Base64;
 import java.util.Date;
+import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
@@ -31,9 +32,10 @@ public class JwtUtil {
         key = Keys.hmacShaKeyFor(bytes);
     }
 
-    public String createJwt(String username) {
+    public String createJwt(String username, List<String> authorities) {
         Claims claims = Jwts.claims(); // Map을 상속받는 객체 Claims
         claims.put("username", username);
+        claims.put("authorities", authorities);
 
         return BEARER_PREFIX +
             Jwts.builder()

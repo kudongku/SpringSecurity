@@ -43,7 +43,7 @@ public class UserService {
             throw new RuntimeException("잘못된 비밀번호를 입력했습니다.");
         }
 
-        String bearerToken = jwtUtil.createJwt(username);
+        String bearerToken = jwtUtil.createJwt(username, user.getAuthorities());
         response.addHeader(HttpHeaders.AUTHORIZATION, bearerToken);
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
