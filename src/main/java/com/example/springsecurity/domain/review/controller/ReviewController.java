@@ -24,7 +24,6 @@ public class ReviewController {
     public ResponseEntity<String> deleteMapping(
         Authentication authentication
     ) {
-
         SimpleGrantedAuthority adminAuthority = new SimpleGrantedAuthority(
             AuthorityEnum.ADMIN.getAuthorityName()
         );
