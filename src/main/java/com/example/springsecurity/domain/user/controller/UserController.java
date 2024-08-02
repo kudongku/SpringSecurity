@@ -1,4 +1,4 @@
-package com.example.springsecurity.user.controller;
+package com.example.springsecurity.domain.user.controller;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;

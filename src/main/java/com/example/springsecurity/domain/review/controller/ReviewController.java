@@ -1,4 +1,4 @@
-package com.example.springsecurity.review.controller;
+package com.example.springsecurity.domain.review.controller;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
