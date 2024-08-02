@@ -64,4 +64,14 @@ public class JwtUtil {
             .getExpiration()
             .before(new Date(System.currentTimeMillis()));
     }
+
+    public String getUsernameFromToken(String token) {
+        return Jwts.parserBuilder()
+            .setSigningKey(key)
+            .build()
+            .parseClaimsJws(token)
+            .getBody()
+            .get("username", String.class);
+    }
+
 }
