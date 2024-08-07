@@ -24,7 +24,6 @@ public class JwtUtil {
 
     @Value("${jwt.secret.key}")
     private String secretKey;
-    private final Long expiredMs = 1000 * 60 * 60 * 24L; // 1 day
     private final String BEARER_PREFIX = "Bearer ";
     private Key key;
 
@@ -34,7 +33,7 @@ public class JwtUtil {
         key = Keys.hmacShaKeyFor(bytes);
     }
 
-    public String createJwt(String username, List<String> authorities) {
+    public String createJwt(String username, List<String> authorities, Long expiredMs) {
         Claims claims = Jwts.claims(); // Map을 상속받는 객체 Claims
         claims.put("username", username);
         claims.put("authorities", authorities);
@@ -78,7 +77,7 @@ public class JwtUtil {
             .get("username", String.class);
     }
 
-    public List<SimpleGrantedAuthority> getAuthorities(String token) {
+    public List<SimpleGrantedAuthority> getAuthoritiesFromToken(String token) {
         List<?> authorities = Jwts.parserBuilder()
             .setSigningKey(key)
             .build()

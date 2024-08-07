@@ -1,7 +1,9 @@
 package com.example.springsecurity.domain.user.service;
 
 import com.example.springsecurity.domain.user.entity.User;
+import com.example.springsecurity.domain.user.entity.UserTokenInfo;
 import com.example.springsecurity.domain.user.repository.UserRepository;
+import com.example.springsecurity.domain.user.repository.UserTokenInfoRepository;
 import com.example.springsecurity.global.util.JwtUtil;
 import jakarta.servlet.http.HttpServletResponse;
 import java.util.Objects;
@@ -15,8 +17,12 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class UserService {
 
+    private final Long AccessTokenExpiredMs = 1000 * 60 * 30L; // 0.5 hour
+    private final Long RefreshTokenExpiredMs = 1000 * 60 * 60 * 24 * 7L; // 1 day
+
     private final JwtUtil jwtUtil;
     private final UserRepository userRepository;
+    private final UserTokenInfoRepository userTokenInfoRepository;
     private final PasswordEncoder passwordEncoder;
 
     @Transactional
@@ -47,11 +53,29 @@ public class UserService {
             throw new RuntimeException("잘못된 비밀번호를 입력했습니다.");
         }
 
-        String bearerToken = jwtUtil.createJwt(username, user.getAuthorities());
-        response.addHeader(HttpHeaders.AUTHORIZATION, bearerToken);
+        String accessToken = jwtUtil.createJwt(
+            username,
+            user.getAuthorities(),
+            AccessTokenExpiredMs
+        );
+
+        String refreshToken = jwtUtil.createJwt(
+            username,
+            user.getAuthorities(),
+            RefreshTokenExpiredMs
+        );
+
+        UserTokenInfo userTokenInfo = userTokenInfoRepository.findByUser(user)
+            .orElse(new UserTokenInfo(user));
+
+        userTokenInfo.update(accessToken, refreshToken);
+
+        userTokenInfoRepository.save(userTokenInfo);
+
+        response.addHeader(HttpHeaders.AUTHORIZATION, accessToken);
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
-        return bearerToken;
+        return accessToken;
     }
 
     @Transactional
@@ -60,7 +84,7 @@ public class UserService {
             () -> new RuntimeException("잘못된 아이디를 입력했습니다.")
         );
 
-        if(!Objects.equals(user.getId(), userId)) {
+        if (!Objects.equals(user.getId(), userId)) {
             throw new RuntimeException("userId가 일치하지 않습니다.");
         }
 
