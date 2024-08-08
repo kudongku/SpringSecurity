@@ -39,4 +39,8 @@ public class UserTokenInfo {
         this.accessToken = accessToken;
         this.refreshToken = refreshToken;
     }
+
+    public void refresh(String accessToken) {
+        this.accessToken = accessToken;
+    }
 }

@@ -7,11 +7,14 @@ import com.example.springsecurity.domain.user.entity.AuthorityEnum;
 import com.example.springsecurity.domain.user.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.Mapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -48,6 +51,32 @@ public class UserController {
         String bearerToken = userService.login(
             userLoginRequestDto.getUsername(),
             userLoginRequestDto.getPassword(),
+            response
+        );
+
+        return ResponseEntity.ok(bearerToken);
+    }
+
+    @GetMapping("/logout")
+    @Operation(summary = "logout", description = "logout.")
+    public ResponseEntity<String> logout(
+        HttpServletRequest request
+    ) {
+        userService.logout(
+            request
+        );
+
+        return ResponseEntity.ok("로그아웃이 완료되었습니다.");
+    }
+
+    @GetMapping("/refreshToken")
+    @Operation(summary = "refreshToken", description = "refreshToken.")
+    public ResponseEntity<String> refreshToken(
+        HttpServletRequest request,
+        HttpServletResponse response
+    ) {
+        String bearerToken = userService.refreshToken(
+            request,
             response
         );
 

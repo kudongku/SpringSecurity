@@ -32,7 +32,7 @@ public class JwtFilter extends OncePerRequestFilter {
         String path = request.getRequestURI();
 
         // 로그인 및 회원가입 경로에서는 필터를 건너뛰기
-        if (path.equals("/api/v1/users/signup") || path.equals("/api/v1/users/login")) {
+        if (path.equals("/api/v1/users/signup") || path.equals("/api/v1/users/login") || path.equals("/api/v1/users/refreshToken")) {
             filterChain.doFilter(request, response);
             return;
         }

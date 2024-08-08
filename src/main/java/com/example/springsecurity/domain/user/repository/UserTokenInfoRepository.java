@@ -12,4 +12,6 @@ public interface UserTokenInfoRepository extends JpaRepository<UserTokenInfo, Lo
     void deleteByUser(User user);
 
     Optional<UserTokenInfo> findByUser(User user);
+
+    Optional<UserTokenInfo> findByAccessToken(String token);
 }

@@ -5,6 +5,7 @@ import com.example.springsecurity.domain.user.entity.UserTokenInfo;
 import com.example.springsecurity.domain.user.repository.UserRepository;
 import com.example.springsecurity.domain.user.repository.UserTokenInfoRepository;
 import com.example.springsecurity.global.util.JwtUtil;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
@@ -35,7 +36,6 @@ public class UserService {
         validateNickname(nickname);
         String encodedPassword = passwordEncoder.encode(password);
         User user = new User(username, encodedPassword, nickname);
-
         userRepository.save(user);
     }
 
@@ -75,6 +75,54 @@ public class UserService {
         response.addHeader(HttpHeaders.AUTHORIZATION, accessToken);
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
+        return accessToken;
+    }
+
+    @Transactional
+    public void logout(HttpServletRequest request) {
+        String token = jwtUtil.getJwtFromHeader(request);
+
+        if (token == null) {
+            throw new RuntimeException("토큰이 존재하지 않습니다.");
+        }
+
+        String username = jwtUtil.getUsernameFromToken(token);
+
+        User user = userRepository.findByUsername(username).orElseThrow(
+            () -> new RuntimeException("잘못된 아이디를 입력했습니다.")
+        );
+
+        userTokenInfoRepository.deleteByUser(user);
+    }
+
+    @Transactional
+    public String refreshToken(
+        HttpServletRequest request,
+        HttpServletResponse response
+    ) {
+        UserTokenInfo userTokenInfo = userTokenInfoRepository.findByAccessToken(
+            request.getHeader(HttpHeaders.AUTHORIZATION)).orElseThrow(
+            () -> new RuntimeException("리프레시 토큰이 존재하지 않습니다.")
+        );
+
+        String refreshToken = userTokenInfo.getRefreshToken().substring(7);
+
+        if (jwtUtil.isExpired(refreshToken)) {
+            throw new RuntimeException("리프래시 토큰이 만료되었습니다.");
+        }
+
+        String accessToken = jwtUtil.createJwt(
+            userTokenInfo.getUser().getUsername(),
+            userTokenInfo.getUser().getAuthorities(),
+            AccessTokenExpiredMs
+        );
+
+        userTokenInfo.refresh(accessToken);
+
+        response.addHeader(HttpHeaders.AUTHORIZATION, accessToken);
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
+
         return accessToken;
     }
 

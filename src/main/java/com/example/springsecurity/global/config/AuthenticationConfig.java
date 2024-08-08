@@ -34,8 +34,7 @@ public class AuthenticationConfig {
             // Cross site Request forgery, rest api를 이용한 서버에서는 stateless하기 때문에 서버에 인증정보를 저장하지 않아 필요하지 않다.
             .authorizeHttpRequests((authorize) -> authorize
                 .requestMatchers(
-                    "/api/v1/users/signup",
-                    "/api/v1/users/login",
+                    "/api/v1/users/**",
                     "/v3/api-docs/**",       // OpenAPI 3 문서 관련 엔드포인트
                     "/swagger-ui/**",        // Swagger UI 관련 엔드포인트
                     "/swagger-ui.html",      // Swagger UI 메인 페이지
