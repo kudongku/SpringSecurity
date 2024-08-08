@@ -7,8 +7,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface UserTokenInfoRepository extends JpaRepository<UserTokenInfo, Long> {
 
-    boolean existsByUser(User user);
-
     void deleteByUser(User user);
 
     Optional<UserTokenInfo> findByUser(User user);
