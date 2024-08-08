@@ -1,6 +1,7 @@
 package com.example.springsecurity.global.util;
 
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
@@ -52,21 +53,31 @@ public class JwtUtil {
         log.info("bearerToken : {}", bearerToken);
 
         if (StringUtils.hasText(bearerToken) && bearerToken.startsWith(BEARER_PREFIX)) {
-            return bearerToken.substring(7);
+            return bearerToken.substring(BEARER_PREFIX.length());
         }
 
         return null;
     }
 
     public boolean isExpired(String token) {
-        return Jwts.parserBuilder()
-            .setSigningKey(key)
-            .build()
-            .parseClaimsJws(token)
-            .getBody()
-            .getExpiration()
-            .before(new Date(System.currentTimeMillis()));
+        try {
+            Date expirationDate = Jwts.parserBuilder()
+                .setSigningKey(key)
+                .build()
+                .parseClaimsJws(token)
+                .getBody()
+                .getExpiration();
+            Date now = new Date();
+            return expirationDate.before(now);
+        } catch (ExpiredJwtException e) {
+            log.error("토큰이 만료되었습니다.");
+            return true;
+        } catch (Exception e) {
+            log.error("Error parsing JWT: {}", e.getMessage());
+            return true;
+        }
     }
+
 
     public String getUsernameFromToken(String token) {
         return Jwts.parserBuilder()

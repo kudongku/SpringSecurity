@@ -17,7 +17,6 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
-import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 @Slf4j(topic = "JwtFilter")
@@ -42,7 +41,7 @@ public class JwtFilter extends OncePerRequestFilter {
 
         String token = jwtUtil.getJwtFromHeader(request);
 
-        if (!StringUtils.hasText(token)) {
+        if (token == null) {
             String errorMessage = "토큰이 제공되지 않았습니다.";
             filterExceptionHandler(response, errorMessage);
             return;
