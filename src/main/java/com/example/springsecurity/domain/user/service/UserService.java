@@ -1,9 +1,11 @@
 package com.example.springsecurity.domain.user.service;
 
+import com.example.springsecurity.domain.user.entity.AuthorityEnum;
 import com.example.springsecurity.domain.user.entity.User;
 import com.example.springsecurity.domain.user.entity.UserTokenInfo;
 import com.example.springsecurity.domain.user.repository.UserRepository;
 import com.example.springsecurity.domain.user.repository.UserTokenInfoRepository;
+import com.example.springsecurity.global.exception.ExpiredTokenException;
 import com.example.springsecurity.global.util.JwtUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -46,11 +48,11 @@ public class UserService {
         HttpServletResponse response
     ) {
         User user = userRepository.findByUsername(username).orElseThrow(
-            () -> new RuntimeException("잘못된 아이디를 입력했습니다.")
+            () -> new IllegalArgumentException("잘못된 아이디를 입력했습니다.")
         );
 
         if (!passwordEncoder.matches(password, user.getPassword())) {
-            throw new RuntimeException("잘못된 비밀번호를 입력했습니다.");
+            throw new IllegalArgumentException("잘못된 비밀번호를 입력했습니다.");
         }
 
         String accessToken = jwtUtil.createJwt(
@@ -69,7 +71,6 @@ public class UserService {
             .orElse(new UserTokenInfo(user));
 
         userTokenInfo.update(accessToken, refreshToken);
-
         userTokenInfoRepository.save(userTokenInfo);
 
         response.addHeader(HttpHeaders.AUTHORIZATION, accessToken);
@@ -83,13 +84,12 @@ public class UserService {
         String token = jwtUtil.getJwtFromHeader(request);
 
         if (token == null) {
-            throw new RuntimeException("토큰이 존재하지 않습니다.");
+            throw new ExpiredTokenException("토큰이 존재하지 않습니다.");
         }
 
         String username = jwtUtil.getUsernameFromToken(token);
-
         User user = userRepository.findByUsername(username).orElseThrow(
-            () -> new RuntimeException("잘못된 아이디를 입력했습니다.")
+            () -> new NullPointerException("잘못된 아이디를 입력했습니다.")
         );
 
         userTokenInfoRepository.deleteByUser(user);
@@ -100,15 +100,16 @@ public class UserService {
         HttpServletRequest request,
         HttpServletResponse response
     ) {
-        UserTokenInfo userTokenInfo = userTokenInfoRepository.findByAccessToken(
-            request.getHeader(HttpHeaders.AUTHORIZATION)).orElseThrow(
-            () -> new RuntimeException("리프레시 토큰이 존재하지 않습니다.")
-        );
-
+        String bearerToken = request.getHeader(HttpHeaders.AUTHORIZATION);
+        UserTokenInfo userTokenInfo = userTokenInfoRepository
+            .findByAccessToken(bearerToken)
+            .orElseThrow(
+                () -> new NullPointerException("리프레시 토큰이 존재하지 않습니다.")
+            );
         String refreshToken = userTokenInfo.getRefreshToken().substring(7);
 
         if (jwtUtil.isExpired(refreshToken)) {
-            throw new RuntimeException("리프래시 토큰이 만료되었습니다.");
+            throw new ExpiredTokenException("리프래시 토큰이 만료되었습니다.");
         }
 
         String accessToken = jwtUtil.createJwt(
@@ -116,7 +117,6 @@ public class UserService {
             userTokenInfo.getUser().getAuthorities(),
             AccessTokenExpiredMs
         );
-
         userTokenInfo.refresh(accessToken);
 
         response.addHeader(HttpHeaders.AUTHORIZATION, accessToken);
@@ -127,13 +127,17 @@ public class UserService {
     }
 
     @Transactional
-    public void giveAuthority(Long userId, String username) {
+    public void giveAuthorityToUser(Long userId, String username) {
         User user = userRepository.findByUsername(username).orElseThrow(
-            () -> new RuntimeException("잘못된 아이디를 입력했습니다.")
+            () -> new IllegalArgumentException("잘못된 아이디를 입력했습니다.")
         );
 
         if (!Objects.equals(user.getId(), userId)) {
-            throw new RuntimeException("userId가 일치하지 않습니다.");
+            throw new IllegalArgumentException("userId가 일치하지 않습니다.");
+        }
+
+        if (user.getAuthorities().contains(AuthorityEnum.ADMIN.getAuthorityName())) {
+            throw new IllegalArgumentException("이미 권한을 가지고 있습니다.");
         }
 
         user.updateAuthority();
