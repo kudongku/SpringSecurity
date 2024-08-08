@@ -34,17 +34,22 @@ public class User {
 
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(columnDefinition = "json")
-    private List<String> authorities;
+    private final List<String> authorities = new ArrayList<>();
 
     public User(String username, String password, String nickname) {
         this.username = username;
         this.password = password;
         this.nickname = nickname;
-        this.authorities = new ArrayList<>();
-        authorities.add(AuthorityEnum.USER.getAuthorityName());
+        addAuthority(AuthorityEnum.USER.getAuthorityName());
     }
 
     public void updateAuthority() {
-        authorities.add(AuthorityEnum.ADMIN.getAuthorityName());
+        addAuthority(AuthorityEnum.ADMIN.getAuthorityName());
+    }
+
+    private void addAuthority(String authority) {
+        if (!authorities.contains(authority)) {
+            authorities.add(authority);
+        }
     }
 }
