@@ -8,6 +8,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -32,8 +33,11 @@ public class AuthenticationConfig {
         http
             .csrf(AbstractHttpConfigurer::disable)
             // Cross site Request forgery, rest api를 이용한 서버에서는 stateless하기 때문에 서버에 인증정보를 저장하지 않아 필요하지 않다.
-            .authorizeHttpRequests((authorize) -> authorize
-                .requestMatchers(
+            .sessionManagement(
+                (sessionManagement) -> sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+            )
+            .authorizeHttpRequests(
+                (authorize) -> authorize.requestMatchers(
                     "/api/v1/users/**",
                     "/v3/api-docs/**",       // OpenAPI 3 문서 관련 엔드포인트
                     "/swagger-ui/**",        // Swagger UI 관련 엔드포인트

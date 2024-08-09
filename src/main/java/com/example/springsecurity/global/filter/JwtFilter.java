@@ -9,6 +9,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.List;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -34,7 +35,16 @@ public class JwtFilter extends OncePerRequestFilter {
         String path = request.getRequestURI();
 
         // 로그인 및 회원가입 경로에서는 필터를 건너뛰기
-        if (path.startsWith("/api/v1/users/")) {
+        if (
+            path.startsWith("/api/v1/users/") ||
+                path.startsWith("/v3/api-docs") ||
+                path.startsWith("/swagger-ui/") ||
+                path.startsWith("/swagger-ui.html") ||
+                path.startsWith("/swagger-resources/") ||
+                path.startsWith("/webjars/") ||
+                path.startsWith("/configuration/ui") ||
+                path.startsWith("/configuration/security")
+        ) {
             filterChain.doFilter(request, response);
             return;
         }
