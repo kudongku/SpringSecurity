@@ -1,5 +1,6 @@
 package com.example.springsecurity.global.util;
 
+import com.example.springsecurity.domain.user.entity.AuthorityEnum;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
@@ -34,10 +35,14 @@ public class JwtUtil {
         key = Keys.hmacShaKeyFor(bytes);
     }
 
-    public String createJwt(String username, List<String> authorities, Long expiredMs) {
+    public String createJwt(String username, List<AuthorityEnum> authorities, Long expiredMs) {
+        List<String> authoritiesToString = authorities.stream()
+            .map(AuthorityEnum::getAuthorityName)
+            .toList();
+
         Claims claims = Jwts.claims(); // Map을 상속받는 객체 Claims
         claims.put("username", username);
-        claims.put("authorities", authorities);
+        claims.put("authorities", authoritiesToString);
 
         return BEARER_PREFIX +
             Jwts.builder()

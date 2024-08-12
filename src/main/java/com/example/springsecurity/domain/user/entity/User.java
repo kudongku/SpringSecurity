@@ -10,8 +10,6 @@ import java.util.ArrayList;
 import java.util.List;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.JdbcTypeCode;
-import org.hibernate.type.SqlTypes;
 
 @Getter
 @NoArgsConstructor
@@ -32,24 +30,25 @@ public class User {
     @Column(nullable = false)
     private String password;
 
-    @JdbcTypeCode(SqlTypes.JSON)
-    @Column(columnDefinition = "json")
-    private final List<String> authorities = new ArrayList<>();
+    @Column
+    private final List<AuthorityEnum> authorities = new ArrayList<>();
 
     public User(String username, String password, String nickname) {
         this.username = username;
         this.password = password;
         this.nickname = nickname;
-        addAuthority(AuthorityEnum.USER.getAuthorityName());
+        addAuthority(AuthorityEnum.USER);
     }
 
     public void updateAuthority() {
-        addAuthority(AuthorityEnum.ADMIN.getAuthorityName());
+        addAuthority(AuthorityEnum.ADMIN);
     }
 
-    private void addAuthority(String authority) {
+    private void addAuthority(AuthorityEnum authority) {
+
         if (!authorities.contains(authority)) {
             authorities.add(authority);
         }
+
     }
 }
