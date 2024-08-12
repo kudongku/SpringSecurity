@@ -20,8 +20,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class UserService {
 
-    private final Long AccessTokenExpiredMs = 1000 * 60 * 30L; // 0.5 hour
-    private final Long RefreshTokenExpiredMs = 1000 * 60 * 60 * 24 * 7L; // 1 day
+    private final static Long ACCESS_TOKEN_EXPIRED_MS = 1000 * 60 * 30L; // 0.5 hour
+    private final static Long REFRESH_TOKEN_EXPIRED_MS = 1000 * 60 * 60 * 24 * 7L; // 1 day
 
     private final JwtUtil jwtUtil;
     private final UserRepository userRepository;
@@ -58,13 +58,13 @@ public class UserService {
         String accessToken = jwtUtil.createJwt(
             username,
             user.getAuthorities(),
-            AccessTokenExpiredMs
+            ACCESS_TOKEN_EXPIRED_MS
         );
 
         String refreshToken = jwtUtil.createJwt(
             username,
             user.getAuthorities(),
-            RefreshTokenExpiredMs
+            REFRESH_TOKEN_EXPIRED_MS
         );
 
         UserTokenInfo userTokenInfo = userTokenInfoRepository.findByUser(user)
@@ -115,7 +115,7 @@ public class UserService {
         String accessToken = jwtUtil.createJwt(
             userTokenInfo.getUser().getUsername(),
             userTokenInfo.getUser().getAuthorities(),
-            AccessTokenExpiredMs
+            ACCESS_TOKEN_EXPIRED_MS
         );
         userTokenInfo.refresh(accessToken);
 
@@ -136,7 +136,7 @@ public class UserService {
             throw new IllegalArgumentException("userId가 일치하지 않습니다.");
         }
 
-        if (user.getAuthorities().contains(AuthorityEnum.ADMIN.getAuthorityName())) {
+        if (user.getAuthorities().contains(AuthorityEnum.ADMIN)) {
             throw new IllegalArgumentException("이미 권한을 가지고 있습니다.");
         }
 

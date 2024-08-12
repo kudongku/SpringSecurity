@@ -1,6 +1,8 @@
 package com.example.springsecurity.domain.user.entity;
 
+import com.example.springsecurity.domain.user.converter.AuthorityListConverter;
 import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -30,6 +32,7 @@ public class User {
     @Column(nullable = false)
     private String password;
 
+    @Convert(converter = AuthorityListConverter.class)
     @Column
     private final List<AuthorityEnum> authorities = new ArrayList<>();
 
